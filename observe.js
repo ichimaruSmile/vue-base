@@ -6,27 +6,35 @@ class Observe {
 
   // 遍历walk对象中的key
   walk(data) {
+    if (!data || typeof data !== 'object') return
+
     Object.keys(data).forEach((key) => {
       this.defineReactive(data, key, data[key])
     })
   }
 
-  defineReactive(target, key, __value) {
+  defineReactive(data, key, __value) {
+    const dep = new Dep()
     // 这里的__value是data[key], 是一个值的引用而不是值本身
-    Object.defineProperty(target, key, {
+    Object.defineProperty(data, key, {
       enumerable: true,
       configurable: true,
       get() {
-        // 需要value参数，因为设置的代理就是被代理对象本身
-        // 如果return target[key]，就会引起无限get
+        // 需要__value参数，因为设置的代理就是被代理对象本身
+        // 如果return data[key]，就会引起无限get
         console.log('get data', `[${key}]`)
+        if (Dep.target) {
+          dep.addSubs(Dep.target)
+        }
         return __value
       },
       set(newValue) {
         if (__value === newValue) return
         console.log('set data', `[${key}]`)
-        // 因为__value引用自data[key], 所以这里将newValue赋值给__value = newValue赋值给data[key]
+        // __value为闭包数据，getter中return __value
         __value = newValue;
+        // 发送通知
+        dep.notify()
       }
     })
   }

@@ -2,13 +2,17 @@ class Vue {
   constructor(options) {
     this.$el = options.el;
     this.$data = options.data;
-    // 1.将options.data中的所有数据设置为响应式(observe.js)
-    new Observe(this.$data);
 
-    // 2.设置this代理以便于访问this.data
+    // 设置this代理以便于访问this.data
     // [场景]通过this.data.[some]取值太麻烦, 需要设置this代理访问this.data
     // this.data.name => this.name
     this.proxyThisData(this.$data)
+
+    // 1.将options.data中的所有数据设置为响应式(observe.js)
+    new Observe(this.$data);
+
+    // 2.遍历dom节点
+    new Compiler(this)
   }
 
   // 设置this代理this.data.
